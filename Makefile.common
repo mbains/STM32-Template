@@ -4,11 +4,11 @@ ELF=$(notdir $(CURDIR)).elf
 
 # Tool path
 
-TOOLROOT=/l/arm/codesourcery/bin
+TOOLROOT=/media/additional/Downloads/frdm/bare-metal-arm/gcc-arm-none-eabi-4_7-2012q4/bin/
 
 # Library path
 
-LIBROOT=/l/arm/STM32F10x_StdPeriph_Lib_V3.5.0
+LIBROOT=../STM32F10x_StdPeriph_Lib_V3.5.0
 
 # Tools
 
@@ -18,7 +18,6 @@ AR=$(TOOLROOT)/arm-none-eabi-ar
 AS=$(TOOLROOT)/arm-none-eabi-as
 
 # Code Paths
-
 DEVICE=$(LIBROOT)/Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x
 CORE=$(LIBROOT)/Libraries/CMSIS/CM3/CoreSupport
 PERIPH=$(LIBROOT)/Libraries/STM32F10x_StdPeriph_Driver
