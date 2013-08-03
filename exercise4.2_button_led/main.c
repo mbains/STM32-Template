@@ -32,7 +32,7 @@ int main(void){
     
     GPIO_StructInit(&BtnStruct);
     BtnStruct.GPIO_Pin = GPIO_Pin_0;
-    BtnStruct.GPIO_Mode = GPIO_Mode_IPD;
+    BtnStruct.GPIO_Mode = GPIO_Mode_IN_FLOATING;
     BtnStruct.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_Init(GPIOA, &BtnStruct);
     
