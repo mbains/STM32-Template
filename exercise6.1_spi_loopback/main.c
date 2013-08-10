@@ -16,6 +16,8 @@ void csInit(void)
 
 int main(void){
     int i,j;
+    int total8 = 0;
+    int total16 = 0;
     
     csInit();
     for(i = 0; i < 8; i++)
@@ -30,6 +32,8 @@ int main(void){
         for(j = 0; j < 4; j++)
             if(rxbuf[j]  != txbuf[j])
                 assert_failed(__FILE__, __LINE__);
+            else
+                total8++;
             
     }
     
@@ -42,6 +46,8 @@ int main(void){
         for(j = 0; j < 4; j++)
             if(rxbuf16[j]  != txbuf16[j])
                 assert_failed(__FILE__, __LINE__);
+            else
+                total16++;
     }
     
     return 0;

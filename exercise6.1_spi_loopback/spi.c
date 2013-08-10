@@ -11,14 +11,38 @@ static const uint16_t speeds[] = {
 void spiInit(SPI_TypeDef * SPIx)
 {
     SPI_InitTypeDef SPI_InitStructure;
-    GPIO_InitTypeDef GPIO_InitStructure;
+    GPIO_InitTypeDef GPIO_Sck_Mosi; //Alternate function push-pull
+    GPIO_InitTypeDef GPIO_Miso; //Input pull-up
     
-    GPIO_StructInit(&GPIO_InitStructure);
+    GPIO_InitTypeDef GPIO_SlaveSelect; //Output push-pull
+   
+    
+    GPIO_StructInit(&GPIO_Sck_Mosi);
+    GPIO_StructInit(&GPIO_Miso);
     SPI_StructInit(&SPI_InitStructure);
+    
+    GPIO_StructInit(&GPIO_SlaveSelect);
+    
     
     if(SPIx == SPI2)
     {
-        /* Enable clocks, configure pins*/
+        RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+        //SPI2 is on APB1 !!!
+        RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
+        //Use GPIO_C3 for SS
+        RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC , ENABLE);
+        
+        //PB13=SCK, PB15=Mosi
+        GPIO_Sck_Mosi.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_15;
+        GPIO_Sck_Mosi.GPIO_Mode = GPIO_Mode_AF_PP;
+        GPIO_Sck_Mosi.GPIO_Speed = GPIO_Speed_50MHz;
+        GPIO_Init(GPIOB, &GPIO_Sck_Mosi);
+        
+        GPIO_Miso.GPIO_Pin = GPIO_Pin_14;
+        GPIO_Miso.GPIO_Mode = GPIO_Mode_IPU;
+        GPIO_Miso.GPIO_Speed = GPIO_Speed_50MHz;
+        GPIO_Init(GPIOB, &GPIO_Miso);
+        
     }
     else {
         /*TODO: SPI 1 not supported*/
