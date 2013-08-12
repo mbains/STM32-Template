@@ -19,6 +19,7 @@ int main(void){
     int total8 = 0;
     int total16 = 0;
     
+    spiInit(SPI2);
     csInit();
     for(i = 0; i < 8; i++)
     {

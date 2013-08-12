@@ -39,7 +39,7 @@ void spiInit(SPI_TypeDef * SPIx)
         GPIO_Init(GPIOB, &GPIO_Sck_Mosi);
         
         GPIO_Miso.GPIO_Pin = GPIO_Pin_14;
-        GPIO_Miso.GPIO_Mode = GPIO_Mode_IPU;
+        GPIO_Miso.GPIO_Mode = GPIO_Mode_IN_FLOATING;
         GPIO_Miso.GPIO_Speed = GPIO_Speed_50MHz;
         GPIO_Init(GPIOB, &GPIO_Miso);
         
@@ -64,9 +64,9 @@ void spiInit(SPI_TypeDef * SPIx)
 int spiReadWrite(SPI_TypeDef * SPIx, uint8_t * rbuf, 
                         const uint8_t * tbuf, int cnt, enum spiSpeed speed) 
 {
-    SPI_DataSizeConfig(SPIx, SPI_DataSize_8b);
+    //SPI_DataSizeConfig(SPIx, SPI_DataSize_8b);
     int i;
-    SPIx->CR1 = (SPIx->CR1 & -SPI_BaudRatePrescaler_256) | speeds[speed];
+    SPIx->CR1 = (SPIx->CR1 & ~SPI_BaudRatePrescaler_256) | speeds[speed];
     
     for(i = 0; i < cnt; i++) {
         if(tbuf) {
@@ -90,7 +90,7 @@ int spiReadWrite16(SPI_TypeDef * SPIx, uint16_t *rbuf,
 {
     SPI_DataSizeConfig(SPIx, SPI_DataSize_16b);
     int i;
-    SPIx->CR1 = (SPIx->CR1 & -SPI_BaudRatePrescaler_256) | speeds[speed];
+    SPIx->CR1 = (SPIx->CR1 & ~SPI_BaudRatePrescaler_256) | speeds[speed];
     
     for(i = 0; i < cnt; i++) {
         if(tbuf) {
