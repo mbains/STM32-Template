@@ -1,5 +1,6 @@
 #include <stm32f10x.h>
 #include "spi.h"
+#include "lcd.h"
 #include <stm32f10x_rcc.h>
 #include <stm32f10x_gpio.h>
 
@@ -14,7 +15,8 @@ int main(void){
     
     spiInit(SPI2);
     
-    
+    ST7735_init();
+    fillScreen(0x07E0);
     
     return 0;
 }
