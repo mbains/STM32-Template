@@ -11,6 +11,16 @@ void Delay(uint32_t nTime);
 //initialize chip select
 void csInit(void)
 {
+    GPIO_InitTypeDef cs_struct;  
+    
+    GPIO_StructInit(&cs_struct);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
+    
+    cs_struct.GPIO_Mode = GPIO_Mode_AF_PP;
+    cs_struct.GPIO_Pin = GPIO_Pin_3;
+    cs_struct.GPIO_Speed = GPIO_Speed_50MHz; //2 MHz suffice?
+    
+    GPIO_Init(GPIOC, &cs_struct);
     
 }
 
@@ -21,36 +31,37 @@ int main(void){
     
     spiInit(SPI2);
     csInit();
-    for(i = 0; i < 8; i++)
-    {
-        for(j = 0; j< 4; j++)
-            txbuf[j] = i*4 + j;
-        
+    while(1) {
+        for(i = 0; i < 8; i++)
+        {
+            for(j = 0; j< 4; j++)
+                txbuf[j] = i*4 + j;
+
         GPIO_WriteBit(GPIOC, GPIO_Pin_3, 0);
-        spiReadWrite(SPI2, rxbuf, txbuf, 4, SPI_SLOW);
+            spiReadWrite(SPI2, rxbuf, txbuf, 4, SPI_SLOW);
         GPIO_WriteBit(GPIOC, GPIO_Pin_3, 1);
-        
-        for(j = 0; j < 4; j++)
-            if(rxbuf[j]  != txbuf[j])
-                assert_failed(__FILE__, __LINE__);
-            else
-                total8++;
-            
-    }
-    
-    for(i = 0; i < 8; i++){
-        for(j = 0; j < 4; j++) 
-            txbuf16[j] = i*4 + j + (i<<8);
+
+            for(j = 0; j < 4; j++)
+                if(rxbuf[j]  != txbuf[j])
+                    assert_failed(__FILE__, __LINE__);
+                else
+                    total8++;
+
+        }
+
+        for(i = 0; i < 8; i++){
+            for(j = 0; j < 4; j++) 
+                txbuf16[j] = i*4 + j + (i<<8);
         GPIO_WriteBit(GPIOC, GPIO_Pin_3, 0);
-        spiReadWrite16(SPI2, rxbuf16, txbuf16, 4, SPI_SLOW);
+            spiReadWrite16(SPI2, rxbuf16, txbuf16, 4, SPI_SLOW);
         GPIO_WriteBit(GPIOC, GPIO_Pin_3, 1);
-        for(j = 0; j < 4; j++)
-            if(rxbuf16[j]  != txbuf16[j])
-                assert_failed(__FILE__, __LINE__);
-            else
-                total16++;
+            for(j = 0; j < 4; j++)
+                if(rxbuf16[j]  != txbuf16[j])
+                    assert_failed(__FILE__, __LINE__);
+                else
+                    total16++;
+        }
     }
-    
     return 0;
 }
 

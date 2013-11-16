@@ -5,7 +5,7 @@
 static const uint16_t speeds[] = {
     [SPI_SLOW] = SPI_BaudRatePrescaler_64,
     [SPI_MEDIUM] = SPI_BaudRatePrescaler_8,
-    [SPI_SLOW] = SPI_BaudRatePrescaler_2
+    [SPI_FAST] = SPI_BaudRatePrescaler_2
 };
 
 void spiInit(SPI_TypeDef * SPIx)
@@ -14,14 +14,11 @@ void spiInit(SPI_TypeDef * SPIx)
     GPIO_InitTypeDef GPIO_Sck_Mosi; //Alternate function push-pull
     GPIO_InitTypeDef GPIO_Miso; //Input pull-up
     
-    GPIO_InitTypeDef GPIO_SlaveSelect; //Output push-pull
-   
     
     GPIO_StructInit(&GPIO_Sck_Mosi);
     GPIO_StructInit(&GPIO_Miso);
     SPI_StructInit(&SPI_InitStructure);
     
-    GPIO_StructInit(&GPIO_SlaveSelect);
     
     
     if(SPIx == SPI2)
@@ -29,8 +26,6 @@ void spiInit(SPI_TypeDef * SPIx)
         RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
         //SPI2 is on APB1 !!!
         RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
-        //Use GPIO_C3 for SS
-        RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC , ENABLE);
         
         //PB13=SCK, PB15=Mosi
         GPIO_Sck_Mosi.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_15;
@@ -64,7 +59,7 @@ void spiInit(SPI_TypeDef * SPIx)
 int spiReadWrite(SPI_TypeDef * SPIx, uint8_t * rbuf, 
                         const uint8_t * tbuf, int cnt, enum spiSpeed speed) 
 {
-    //SPI_DataSizeConfig(SPIx, SPI_DataSize_8b);
+    SPI_DataSizeConfig(SPIx, SPI_DataSize_8b);
     int i;
     SPIx->CR1 = (SPIx->CR1 & ~SPI_BaudRatePrescaler_256) | speeds[speed];
     
