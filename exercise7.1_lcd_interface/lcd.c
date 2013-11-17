@@ -94,7 +94,7 @@ static void Enable_GPIO(uint32_t rcc_apb_x, GPIO_TypeDef * gpio_x, uint16_t pin)
     GPIO_StructInit(&cs_struct);
     RCC_APB2PeriphClockCmd(rcc_apb_x, ENABLE);
     
-    cs_struct.GPIO_Mode = GPIO_Mode_AF_PP;
+    cs_struct.GPIO_Mode = GPIO_Mode_Out_PP;
     cs_struct.GPIO_Pin = pin;
     cs_struct.GPIO_Speed = GPIO_Speed_50MHz; //2 MHz suffice?
     

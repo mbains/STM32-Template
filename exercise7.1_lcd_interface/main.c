@@ -3,6 +3,7 @@
 #include "lcd.h"
 #include <stm32f10x_rcc.h>
 #include <stm32f10x_gpio.h>
+#include "random_colors.h"
 
 static uint8_t txbuf[4], rxbuf[4];
 static uint16_t txbuf16[4], rxbuf16[4];
@@ -13,11 +14,17 @@ void Delay(uint32_t nTime);
 
 int main(void){
     
+    int i;
+    if(SysTick_Config(SystemCoreClock / 1000))
+        while(1);
+        
+        //spiTest();
     spiInit(SPI2);
     
     ST7735_init();
-    fillScreen(0x07E0);
-    
+    for(i = 0; i < 8; i++) {
+        fillScreen(random_colors[i]);
+    }
     return 0;
 }
 
@@ -28,6 +35,7 @@ int spiTest()
     int total16 = 0;
     
     spiInit(SPI2);
+    while(1) {
     for(i = 0; i < 8; i++)
     {
         for(j = 0; j< 4; j++)
@@ -57,7 +65,7 @@ int spiTest()
             else
                 total16++;
     }
-    
+    }
     return 0;
 }
 /*(5) Timer code*/
