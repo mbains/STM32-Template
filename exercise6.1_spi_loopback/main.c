@@ -16,7 +16,7 @@ void csInit(void)
     GPIO_StructInit(&cs_struct);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
     
-    cs_struct.GPIO_Mode = GPIO_Mode_AF_PP;
+    cs_struct.GPIO_Mode = GPIO_Mode_Out_PP;
     cs_struct.GPIO_Pin = GPIO_Pin_3;
     cs_struct.GPIO_Speed = GPIO_Speed_50MHz; //2 MHz suffice?
     
@@ -31,6 +31,8 @@ int main(void){
     
     spiInit(SPI2);
     csInit();
+    if(SysTick_Config(SystemCoreClock / 1000))
+        while(1);
     while(1) {
         for(i = 0; i < 8; i++)
         {
