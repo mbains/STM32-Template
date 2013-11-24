@@ -1,11 +1,17 @@
 #include <stm32f10x.h>
 #include <stm32f10x_rcc.h>
 #include <stm32f10x_gpio.h>
+#include "usart.h"
 
 
 int main(void){
     if(SysTick_Config(SystemCoreClock / 1000))
         while(1);
+    usart_init();
+    while(1) {
+        Delay(250);
+        usart_TxTest();
+    }
     return 0;
 }
 
