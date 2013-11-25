@@ -107,14 +107,14 @@ void USART1_IRQHandler(void) {
     }
 }
 
-int getchar(void) 
+int usart_getc(void) 
 {       
     uint8_t data;
     while(!Dequeue(&rxbuffer, &data));
     return data;
 }
 
-int putchar(int c)
+int usart_putc(int c)
 {
     while(!Enqueue(&txbuffer, c)); 
     
@@ -130,7 +130,18 @@ int usart_write_arr(char *p, int len)
     int i;
     
     for(i=0; i<len; i++) {
-        putchar(&txbuffer, *p++);
+        usart_putc(*p++);
     }
     return len;
+}
+
+int usart_read_arr(char *p, int len)
+{
+    int i = len;
+
+    while(i > 0) {
+        *p++ = usart_getc();
+        i--;
+    }
+    return len - i;
 }

@@ -13,9 +13,11 @@
 int usart_init();
 int usart_TxTest();
 
-int getchar(void);
-int putchar(int c);
+int usart_getc(void);
+int usart_putc(int c);
 
+int usart_write_arr(char *p, int len);
+int usart_read_arr(char *p, int len);
 
 
 #endif	/* USART_H */
