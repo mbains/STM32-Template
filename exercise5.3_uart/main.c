@@ -4,16 +4,7 @@
 #include "usart.h"
 
 
-int main(void){
-    if(SysTick_Config(SystemCoreClock / 1000))
-        while(1);
-    usart_init();
-    while(1) {
-        Delay(250);
-        usart_TxTest();
-    }
-    return 0;
-}
+
 
 /*(5) Timer code*/
 static __IO uint32_t TimingDelay;
@@ -38,3 +29,16 @@ void assert_failed(uint8_t * file, uint32_t line)
 }
 #endif
 
+int main(void){
+    int charin;
+    if(SysTick_Config(SystemCoreClock / 1000))
+        while(1);
+    usart_init();
+    
+    while(1) {
+        //Delay(250);
+        charin = getchar();
+        putchar(charin);
+    }
+    return 0;
+}

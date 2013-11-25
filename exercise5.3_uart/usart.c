@@ -2,12 +2,19 @@
 #include <stm32f10x_rcc.h>
 #include <stm32f10x_gpio.h>
 #include <stm32f10x_usart.h>
+#include "ring.h"
 #include "usart.h"
+
+static RingBuffer txbuffer = {0, 0};
+static RingBuffer rxbuffer = {0, 0};
 
 #define countof(a)   (sizeof(a) / sizeof(*(a)))
 
 uint8_t txbuf[] = "Hello\r\n";
 #define txbufsize  (countof(txbuf) - 1)
+
+static int TxPrimed = 0;
+int RxOverflow = 0;
 
 int usart_init() {
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1 |
@@ -57,6 +64,11 @@ int usart_init() {
 
     USART_Cmd(USART1 , ENABLE);
     
+    
+    /* Enable RXNE interrupt */
+    USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+    /* Enable USART1 global interrupt */
+    NVIC_EnableIRQ(USART1_IRQn);
 
     return 0;
 }
@@ -68,4 +80,57 @@ int usart_TxTest()
         USART_SendData(USART1, txbuf[idx]);
         while(USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
     }
+}
+
+void USART1_IRQHandler(void) {
+    if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) 
+    {
+        uint8_t data;
+        //buffer the data or toss it f there is no room
+        //flow control will prevent this
+        data = USART_ReceiveData(USART1) & 0xff;
+        if(!Enqueue(&rxbuffer, data))
+            RxOverflow = 1;
+        
+    }
+    
+    if(USART_GetITStatus(USART1, USART_IT_TXE) != RESET) {
+        uint8_t data;
+        
+        if(Dequeue(&txbuffer, &data)){
+            USART_SendData(USART1, data);
+        } else {
+            //if nothing to send disable interrupt
+            USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
+            TxPrimed = 0;
+        }
+    }
+}
+
+int getchar(void) 
+{       
+    uint8_t data;
+    while(!Dequeue(&rxbuffer, &data));
+    return data;
+}
+
+int putchar(int c)
+{
+    while(!Enqueue(&txbuffer, c)); 
+    
+    if(!TxPrimed) {
+        TxPrimed = 1;
+        USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
+    }
+    
+}
+
+int usart_write_arr(char *p, int len)
+{
+    int i;
+    
+    for(i=0; i<len; i++) {
+        putchar(&txbuffer, *p++);
+    }
+    return len;
 }

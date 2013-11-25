@@ -13,6 +13,10 @@
 int usart_init();
 int usart_TxTest();
 
+int getchar(void);
+int putchar(int c);
+
+
 
 #endif	/* USART_H */
 
