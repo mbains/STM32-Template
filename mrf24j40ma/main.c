@@ -4,7 +4,6 @@
 #include <stm32f10x_gpio.h>
 #include "usart/usart.h"
 #include "gpio/gpio.h"
-#include <stdio.h>
 
 
 
@@ -32,24 +31,26 @@ void assert_failed(uint8_t * file, uint32_t line)
 #endif
 
 int main(void){
+   // char * heap_end;
     int charin;
-    EZGPIO_Interface * userBtn = EZGPIO_getUserLed();
+    EZGPIO_Interface * userLED = EZGPIO_getUserLed();
+    EZGPIO_Interface * userBtn = EZGPIO_getUserBtn();
     if(SysTick_Config(SystemCoreClock / 1000))
         while(1);
     usart_init();
     EZGPIO_InitUserBtn();
     EZGPIO_InitUserLed();
-    
+
     while(1) {
         //Delay(250);
         charin = usart_getc();
-        printf("stm32: %c\r\n", charin);
+        iprintf("stm32: %c\r\n", charin);
         switch(charin) {
             case 'a':
-                EZGPIO_SetOutput(userBtn, 1);
+                EZGPIO_SetOutput(userLED, EZGPIO_ReadInput(userBtn));
                 break;
             default:
-                EZGPIO_SetOutput(userBtn, 0);
+                EZGPIO_SetOutput(userLED, 0);
                 
         }
         
