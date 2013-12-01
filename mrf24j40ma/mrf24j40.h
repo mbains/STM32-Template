@@ -13,6 +13,7 @@
 
 void mrf24j40_init(EZGPIO_Interface * cs, EZGPIO_Interface * reset);
 uint8_t mrf24j40_getAckTMOut();
+void mrf24j40_devinit();
 
 #endif	/* MRF24J40_H */
 

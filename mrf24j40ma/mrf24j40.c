@@ -135,7 +135,7 @@
 #define MRF_I_RXIF  0b00001000
 #define MRF_I_TXNIF 0b00000001
 
-
+extern void Delay(uint32_t nTime);
 typedef struct {
     EZGPIO_Interface * cs;
     EZGPIO_Interface * reset;
@@ -145,30 +145,44 @@ typedef struct {
 static MRF24J40_t mrf_driver;
 
 static uint8_t read_short(uint8_t address);
-static uint8_t read_long(MRF24J40_t driver, uint16_t address);
+static uint8_t read_long(uint16_t address);
 static void write_short(uint8_t address, uint8_t data);
 static void write_long(uint16_t address, uint8_t data);
 
 static uint8_t read_short(uint8_t address) {
-    uint8_t tx_d[] = {address<<1 & 0b01111110, 0};
+    uint8_t tx_d[] = {address<<1 & 0x7e, 0};
     uint8_t rx_d[2];
     EZGPIO_SetOutput(mrf_driver.cs, 0);
-    // 0 top for short addressing, 0 bottom for read
     spiReadWrite(SPI2, rx_d, tx_d, 2, SPI_SLOW);
     EZGPIO_SetOutput(mrf_driver.cs, 1);
     return rx_d[1]; //data only transmitted in 2nd half. section 2.14.1
 }
 
-static uint8_t read_long(MRF24J40_t driver, uint16_t address) {
-    
+static uint8_t read_long(uint16_t address) {
+    uint16_t tx_dl = (((1 << 11) | (address << 1)) << 4);
+    EZGPIO_SetOutput(mrf_driver.cs, 0);
+    uint8_t rx;
+    spiReadWrite16(SPI2, 0, &tx_dl, 1, SPI_SLOW);
+    spiReadWrite(SPI2, &rx, 0, 1, SPI_SLOW);
+    EZGPIO_SetOutput(mrf_driver.cs, 1);
+    return rx;
 }
 
 static void write_short(uint8_t address, uint8_t data) {
-    
+    uint8_t tx_d[] = { ((address<<1 | 0x1) & 0x7f), data};
+    EZGPIO_SetOutput(mrf_driver.cs, 0);
+    spiReadWrite(SPI2, 0, tx_d, 2, SPI_SLOW);
+    EZGPIO_SetOutput(mrf_driver.cs, 1);
 }
 
+
+
 static void write_long(uint16_t address, uint8_t data) {
-    
+    uint16_t tx_dl = (((1 << 11) | (address << 1) | 1) << 4);
+    EZGPIO_SetOutput(mrf_driver.cs, 0);
+    spiReadWrite16(SPI2, 0, &tx_dl, 1, SPI_SLOW);
+    spiReadWrite(SPI2, 0, &data, 1, SPI_SLOW);
+    EZGPIO_SetOutput(mrf_driver.cs, 1);
 }
 
 void mrf24j40_init(EZGPIO_Interface * cs, EZGPIO_Interface * reset) {
@@ -176,7 +190,23 @@ void mrf24j40_init(EZGPIO_Interface * cs, EZGPIO_Interface * reset) {
     mrf_driver.reset = reset;
     
     spiInit(SPI2);
+    EZGPIO_SetOutput(reset, 1);
 }
+
+void mrf24j40_devinit() 
+{
+    write_short(MRF_PACON2, 0x98); // – Initialize FIFOEN = 1 and TXONTS = 0x6.
+    write_short(MRF_TXSTBL, 0x95); // – Initialize RFSTBL = 0x9.
+    write_short(MRF_PANIDL, 0xFF);
+    
+    iprintf("Read shorts MRF_PACON2: 0x%x\r\n", read_short(MRF_PACON2));
+    iprintf("Read shorts MRF_TXSTBL: 0x%x\r\n", read_short(MRF_TXSTBL));
+    iprintf("Read shorts MRF_PANIDL: 0x%x\r\n", read_short(MRF_PANIDL));
+    
+    write_long(MRF_RFCON0, 0b10101010);    
+    iprintf("read long MRF_RFCON0: 0x%x\r\n", read_long(MRF_RFCON0));
+}
+
 
 uint8_t mrf24j40_getAckTMOut() {
     return read_short(MRF_ACKTMOUT);
