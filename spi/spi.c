@@ -21,9 +21,10 @@ void spiInit(SPI_TypeDef * SPIx)
     
     if(SPIx == SPI2)
     {
-        RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+        RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB2Periph_AFIO, ENABLE);
         //SPI2 is on APB1 !!!
         RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
+        
 
         //PB13=SCK, PB15=Mosi
         GPIO_Sck_Mosi.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_15;
@@ -57,7 +58,7 @@ void spiInit(SPI_TypeDef * SPIx)
 int spiReadWrite(SPI_TypeDef * SPIx, uint8_t * rbuf, 
                         const uint8_t * tbuf, int cnt, enum spiSpeed speed) 
 {
-    //SPI_DataSizeConfig(SPIx, SPI_DataSize_8b);
+    SPI_DataSizeConfig(SPIx, SPI_DataSize_8b);
     int i;
     SPIx->CR1 = (SPIx->CR1 & ~SPI_BaudRatePrescaler_256) | speeds[speed];
     
