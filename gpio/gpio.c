@@ -27,6 +27,10 @@ void EZGPIO_SetInFloating(EZGPIO_Interface * iface_p)
     GPIO_Configure(iface_p, GPIO_Mode_IN_FLOATING);
 }
 
+void EZGPIO_SetInPullUp(EZGPIO_Interface* iface_p) {
+     GPIO_Configure(iface_p, GPIO_Mode_IPU);
+}
+
 
 uint8_t EZGPIO_ReadInput(EZGPIO_Interface * iface_p) {
     return GPIO_ReadInputDataBit(iface_p->gpio_port, iface_p->pin);

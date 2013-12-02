@@ -22,6 +22,7 @@ typedef struct {
 
 void EZGPIO_SetOutPP(EZGPIO_Interface * iface_p);
 void EZGPIO_SetInFloating(EZGPIO_Interface * iface_p);
+void EZGPIO_SetInPullUp(EZGPIO_Interface * iface_p);
 
 uint8_t EZGPIO_ReadInput(EZGPIO_Interface * iface_p);
 void EZGPIO_SetOutput(EZGPIO_Interface * iface_p, uint8_t value);
