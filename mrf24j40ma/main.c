@@ -6,7 +6,7 @@
 #include "gpio/gpio.h"
 #include "mrf24j40.h"
 
-
+#define MRF_BOARD_B
 
 /*(5) Timer code*/
 static __IO uint32_t TimingDelay;
@@ -35,9 +35,16 @@ int main(void){
     
     if(SysTick_Config(SystemCoreClock / 1000))
         while(1);
-    
+    uint16_t myaddr, destaddr;
+#ifdef MRF_BOARD_B
+    myaddr = 0x6000;
+    destaddr = 0x6001;
+#else
+    myaddr = 0x6001;
+    destaddr = 0x6000;
+#endif
    // char * heap_end;
-    int charin;
+    int evt_count = 0;
     mrf_evt evt;
     EZGPIO_Interface * userLED = EZGPIO_getUserLed();
     EZGPIO_Interface * userBtn = EZGPIO_getUserBtn();
@@ -57,30 +64,20 @@ int main(void){
     Delay(100);
     mrf24j40_setpan(0xcafe);
 //   This is _our_ address
-    mrf24j40_setShortAddr(0x6001); 
+    mrf24j40_setShortAddr(myaddr);
     while(1) {
-        //Delay(250);
-        //charin = usart_getc();
+
         Delay(600);
-        iprintf("stm32: %c\r\n", charin);
-        //iprintf("ack = %x \r\n",mrf24j40_getAckTMOut());
         mrf24j40_interrupt_handler();
         evt = mrf24j40_check_flags();
         if(evt & mrf_rxevent) {
             iprintf("mrf_rxevent\r\n");
+            EZGPIO_SetOutput(userLED, (evt_count++%2));
         }
         if(evt & mrf_txevent) {
             iprintf("mrf_txevent\r\n");
         }
-        mrf24j40_send16(0x6000, "hello");
-        switch(charin) {
-            case 'a':
-                EZGPIO_SetOutput(userLED, EZGPIO_ReadInput(userBtn));
-                break;
-            default:
-                EZGPIO_SetOutput(userLED, 0);
-                
-        }
+        mrf24j40_send16(destaddr, "hello");
         
     }
     return 0;
