@@ -13,9 +13,10 @@ int main(void) {
     }
         
     
-    EZGPIO_Interface tim_GPIO = {GPIOA, RCC_APB2Periph_GPIOA, GPIO_Pin_1};
+    //must enable RCC_AFIO for bus 2 for PWM
+    EZGPIO_Interface tim_GPIO = {GPIOA, RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, GPIO_Pin_1};
     
-    EZGPIO_SetOutPP(&tim_GPIO);
+    EZGPIO_SetAFPP(&tim_GPIO);
     
     //EZGPIO_SetOutput(&tim_GPIO, 1);
 
@@ -27,14 +28,14 @@ int main(void) {
     // enable timer clock
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
-
+    
     // configure timer
 
     // PWM frequency = 100 hz with 24,000,000 hz system clock
 
     // 24,000,000/240 = 100,000
 
-    // 100,000/2000 = 50
+    // 100,000/1000 = 100
 
     TIM_TimeBaseStructInit(&TIM_TimeBaseStructure);
 
@@ -66,8 +67,18 @@ int main(void) {
     TIM_Cmd(TIM2, ENABLE);
     
     TIM_SetCompare2(TIM2, 200);
-
-    while (1);
+    
+    while (1) {
+        int interval = 0;
+        for(; interval < 1000; interval+=10) {
+            TIM_SetCompare2(TIM2, interval);
+            Delay(10);
+        }
+        for(; interval > 0; interval+= -10) {
+            TIM_SetCompare2(TIM2, interval);
+            Delay(10);
+        }
+    }
 }
 
 /*(5) Timer code*/

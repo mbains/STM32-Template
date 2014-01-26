@@ -22,6 +22,11 @@ void EZGPIO_SetOutPP(EZGPIO_Interface * iface_p)
     GPIO_Configure(iface_p, GPIO_Mode_Out_PP);
 }
 
+void EZGPIO_SetAFPP(EZGPIO_Interface * iface_p)
+{
+    GPIO_Configure(iface_p, GPIO_Mode_AF_PP);
+}
+
 void EZGPIO_SetInFloating(EZGPIO_Interface * iface_p)
 {
     GPIO_Configure(iface_p, GPIO_Mode_IN_FLOATING);
