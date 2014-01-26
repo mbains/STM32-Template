@@ -31,11 +31,11 @@ int main(void) {
     
     // configure timer
 
-    // PWM frequency = 100 hz with 24,000,000 hz system clock
+    // PWM frequency = 50 hz with 24,000,000 hz system clock for a 20ms period
 
     // 24,000,000/240 = 100,000
 
-    // 100,000/1000 = 100
+    // 100,000/2000 = 50
 
     TIM_TimeBaseStructInit(&TIM_TimeBaseStructure);
 
@@ -43,7 +43,7 @@ int main(void) {
 
             = SystemCoreClock / 100000 - 1; // 0..239
 
-    TIM_TimeBaseStructure.TIM_Period = 1000 - 1; // 0..999
+    TIM_TimeBaseStructure.TIM_Period = 2000 - 1; // 0..999
 
     TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 
@@ -66,17 +66,17 @@ int main(void) {
 
     TIM_Cmd(TIM2, ENABLE);
     
-    TIM_SetCompare2(TIM2, 200);
-    
+   
+
     while (1) {
-        int interval = 0;
-        for(; interval < 1000; interval+=10) {
+        int interval = 70;
+        for(; interval < 220; interval+=1) {
             TIM_SetCompare2(TIM2, interval);
-            Delay(10);
+            Delay(40);
         }
-        for(; interval > 0; interval+= -10) {
+        for(; interval > 70; interval+= -1) {
             TIM_SetCompare2(TIM2, interval);
-            Delay(10);
+            Delay(40);
         }
     }
 }
