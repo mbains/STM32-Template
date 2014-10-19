@@ -20,6 +20,8 @@ void ST7735_setAddrWindow(uint16_t x0, uint16_t y0,
 void ST7735_pushColor(uint16_t *color, int cnt);
 void ST7735_init();
 void ST7735_backLight(uint8_t on);
+void ST7735_DrawChar(short x, short y, unsigned char c, short textColor, short bgColor, unsigned char size);
+void ST7735_PrintLog(short x, short y, unsigned char * str, uint16_t color);
 
 void fillScreen(uint16_t color);
 

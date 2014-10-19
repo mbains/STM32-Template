@@ -1,4 +1,5 @@
 #include <stm32f10x.h>
+
 #include "spi.h"
 #include "lcd.h"
 #include <stm32f10x_rcc.h>
@@ -14,7 +15,7 @@ void Delay(uint32_t nTime);
 
 int main(void){
     
-    int i;
+ 
     if(SysTick_Config(SystemCoreClock / 1000))
         while(1);
         
@@ -22,9 +23,15 @@ int main(void){
     spiInit(SPI2);
     
     ST7735_init();
-    for(i = 0; i < 8; i++) {
-        fillScreen(random_colors[i]);
+    fillScreen(0);
+    int i = 0;
+
+    while(1) {
+        //Delay(50);
+        ST7735_PrintLog(10, 10, "Hello World!", random_colors[i%random_colors_len]);
+        i++;
     }
+    
     return 0;
 }
 
