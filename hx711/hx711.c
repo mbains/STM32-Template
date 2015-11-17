@@ -32,7 +32,7 @@ int32_t hx711_read() {
     for(j = 3; j--;) {
         for(i = 8; i--;) {
             EZGPIO_SetOutput(m_hx_iface._sck, 1);
-            data |= (EZGPIO_ReadInput(m_hx_iface._dout) << i);
+            data[j] |= (EZGPIO_ReadInput(m_hx_iface._dout) << i);
             EZGPIO_SetOutput(m_hx_iface._sck, 0);
         }
     }
