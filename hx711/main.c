@@ -4,9 +4,8 @@
 #include <stm32f10x_gpio.h>
 #include "usart/usart.h"
 #include "gpio/gpio.h"
-#include "mrf24j40.h"
-
-#define MRF_BOARD_B
+#include "hx711.h"
+#include <stdio.h>
 
 /*(5) Timer code*/
 static __IO uint32_t TimingDelay;
@@ -36,48 +35,51 @@ int main(void){
     if(SysTick_Config(SystemCoreClock / 1000))
         while(1);
     uint16_t myaddr, destaddr;
-#ifdef MRF_BOARD_B
-    myaddr = 0x6000;
-    destaddr = 0x6001;
-#else
-    myaddr = 0x6001;
-    destaddr = 0x6000;
-#endif
+
    // char * heap_end;
     int evt_count = 0;
-    mrf_evt evt;
     EZGPIO_Interface * userLED = EZGPIO_getUserLed();
     EZGPIO_Interface * userBtn = EZGPIO_getUserBtn();
 
-    EZGPIO_Interface cs = {.gpio_port = GPIOC, .pin = GPIO_Pin_0, .rcc_apb_x = RCC_APB2Periph_GPIOC};
-    EZGPIO_Interface reset = {.gpio_port = GPIOC, .pin = GPIO_Pin_1, .rcc_apb_x = RCC_APB2Periph_GPIOC};
+    EZGPIO_Interface sck = {.gpio_port = GPIOC, .pin = GPIO_Pin_0, .rcc_apb_x = RCC_APB2Periph_GPIOC};
+    EZGPIO_Interface dout = {.gpio_port = GPIOC, .pin = GPIO_Pin_1, .rcc_apb_x = RCC_APB2Periph_GPIOC};
 
-    EZGPIO_SetOutPP(&cs);
-    EZGPIO_SetOutPP(&reset);
+    EZGPIO_SetOutPP(&sck);
+    EZGPIO_SetInFloating(&dout);
     
     usart_init();
-    mrf24j40_init(&cs, &reset);
+
+    hx711_init(&sck, &dout);
     EZGPIO_InitUserBtn();
     EZGPIO_InitUserLed();
-
-    mrf24j40_devinit();
-    Delay(100);
-    mrf24j40_setpan(0xcafe);
-//   This is _our_ address
-    mrf24j40_setShortAddr(myaddr);
+    iprintf("Prepare Tare\r\n");
+    Delay(1000);
+    iprintf("Begin Tare\r\n");
+    int32_t sum = 0;
+    int32_t offset = 0;
+    //hx711_tare(10);
+    iprintf("Tare Complete\r\n");
     while(1) {
 
-        Delay(600);
-        mrf24j40_interrupt_handler();
-        evt = mrf24j40_check_flags();
-        if(evt & mrf_rxevent) {
-            iprintf("mrf_rxevent\r\n");
-            EZGPIO_SetOutput(userLED, (evt_count++%2));
+        //Delay(50);
+        sum = 0;
+        //iprintf("test\r\n");
+        EZGPIO_SetOutput(userLED, (evt_count++%2));
+        sum += hx711_read();
+        
+        iprintf("read1: %d\r\n", (sum + offset));
+        if(EZGPIO_ReadInput(userBtn) == 1) {
+            offset = 0;
+            offset = offset - sum;
         }
-        if(evt & mrf_txevent) {
-            iprintf("mrf_txevent\r\n");
-        }
-        mrf24j40_send16(destaddr, "hello");
+//        sum += (hx711_read());
+//        iprintf("read2: %d\r\n", sum/2);
+//        sum += (hx711_read());
+//        iprintf("read3: %d\r\n", sum/3);
+        
+//        sum = hx711_get_value(20);
+//        iprintf("read average: %d\r\n\r\n", sum);
+        //scanf("%c", &input);
         
     }
     return 0;

@@ -5,7 +5,7 @@ typedef struct {
     EZGPIO_Interface * _sck;
     EZGPIO_Interface * _dout;
     int8_t _gain;
-    uint32_t _offset;
+    int32_t _offset;
     uint32_t _scale;
 } hx_iface_t;
 
@@ -15,7 +15,7 @@ int8_t hx711_init(EZGPIO_Interface * sck, EZGPIO_Interface *dout) {
     m_hx_iface._sck = sck;
     m_hx_iface._dout = dout;
     m_hx_iface._gain = 1;
-  
+    return 0;
 }
     
 int8_t hx711_is_ready() {
@@ -25,6 +25,7 @@ int8_t hx711_is_ready() {
 int32_t hx711_read() {
     while(!hx711_is_ready());
     
+    int32_t result = 0;
     uint8_t data[3];
     uint8_t j;
     uint8_t i;
@@ -44,29 +45,37 @@ int32_t hx711_read() {
     }
     data[2] ^= 0x80;
     
-    return ((uint32_t) data[2] << 16) | ((uint32_t) data[1] << 8) | (uint32_t) data[0];
+    result = ((uint32_t) data[2] << 16) | ((uint32_t) data[1] << 8) | (uint32_t) data[0];
+    result = result/1000;
+    return result;
     
 }
 
 int32_t hx711_read_average(uint8_t times) {
+    int32_t read_val;
     int32_t sum = 0;
     uint8_t i = 0;
     for(; i < times; i++) {
         sum += hx711_read();
+        //iprintf("sum = %d, interval = %d, div=%d\r\n", sum, i+1, (sum/ (i+1)));
     }
     return sum/times;
 }
 
-double hx711_get_value(uint8_t times) {
-    hx711_read_average(times) - m_hx_iface._offset;
+int32_t hx711_get_value(uint8_t times) {
+    return (hx711_read_average(times) - m_hx_iface._offset);
 }
 
-float hx711_get_units(uint8_t times) {
+int32_t hx711_get_single_value() {
+    return (hx711_read() - m_hx_iface._offset);
+}
+
+double hx711_get_units(uint8_t times) {
     return hx711_get_value(times) / m_hx_iface._scale;
 }
 
 void hx711_tare(uint8_t times) {
-    double sum = hx711_read_average(times);
+    int32_t sum = hx711_read_average(times);
     hx711_set_offset(sum);
 }
 
@@ -74,3 +83,6 @@ void hx711_set_offset(int32_t offset) {
     m_hx_iface._offset = offset;
 }
 
+void hx711_set_tare(int32_t tare) {
+    m_hx_iface._offset = tare;
+}
