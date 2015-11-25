@@ -14,7 +14,7 @@ static hx_iface_t m_hx_iface;
 int8_t hx711_init(EZGPIO_Interface * sck, EZGPIO_Interface *dout) {
     m_hx_iface._sck = sck;
     m_hx_iface._dout = dout;
-    m_hx_iface._gain = 1;
+    m_hx_iface._gain = 3;
     return 0;
 }
     
@@ -46,7 +46,7 @@ int32_t hx711_read() {
     data[2] ^= 0x80;
     
     result = ((uint32_t) data[2] << 16) | ((uint32_t) data[1] << 8) | (uint32_t) data[0];
-    result = result/1000;
+    result = result/100;
     return result;
     
 }
